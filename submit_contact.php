@@ -1,6 +1,6 @@
 <?php
-if (!isset($_GET['email']) || !filter_var($_GET['email'], FILTER_VALIDATE_EMAIL) || 
-    !isset($_GET['message']) || empty($_GET['message'])) {
+if (!isset($_POST['email']) || !filter_var($_POST['email'], FILTER_VALIDATE_EMAIL) || 
+    !isset($_POST['message']) || empty($_POST['message'])) {
     echo 'Un des parametres ou les deux sont manquants ou incorrectes, retournez au formulaire pour recommencer.';
 
     return;
@@ -13,7 +13,7 @@ if (!isset($_GET['email']) || !filter_var($_GET['email'], FILTER_VALIDATE_EMAIL)
     
     <div class="card-body">
         <h5 class="card-title">Rappel de vos informations</h5>
-        <p class="card-text"><b>Email</b> : <?php echo $_GET['email']; ?></p>
-        <p class="card-text"><b>Message</b> : <?php echo $_GET['message']; ?></p>
+        <p class="card-text"><b>Email</b> : <?php echo htmlspecialchars($_POST['email']); ?></p>
+        <p class="card-text"><b>Message</b> : <?php echo htmlspecialchars($_POST['message']); ?></p>
     </div>
 </div>
