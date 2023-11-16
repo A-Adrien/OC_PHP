@@ -1,4 +1,68 @@
 <!-- index.php -->
+
+<?php
+    //include some variables and functions
+    include_once('variables.php');
+    include_once('functions.php');
+
+    // Is connected ?
+    $isConnected = false;
+    
+    //Is the user coming from the connection form
+    if (isset($_POST['connection'])) {
+
+        //test if $_POST variables exists
+        if (!isset($_POST['email']) || !isset($_POST['password'])) {
+
+            echo 'Une des informations du formulaire de connexion est manquante.';
+            $isConnected = false;
+
+        } else {
+
+            $email = $_POST['email'];
+            $password = $_POST['password'];
+
+            //test if the email and passwords are valid
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($password) == 0) {
+
+                echo 'l\'email ou le mot de passe est syntaxiquement incorrecte.';
+
+            } else {
+
+                $isEmailValid = false;
+
+                //test if the email and password match an account email and password
+                foreach ($users as $user) {
+
+                    if ($email == $user['email'] && !$isEmailValid) {
+
+                        $isEmailValid = true;
+
+                        //test password
+                        if ($password == $user['password']) {
+
+                            $isConnected = true;
+                            $loggedUser = $user;
+
+                        } else {
+
+                            echo 'Le mot de passe est invalide.';
+
+                        }
+                    }
+                }
+
+                if (!$isEmailValid) {
+                    
+                    echo 'L\'email est invalide.';
+
+                }
+            }
+        }
+    }
+
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -14,18 +78,14 @@
 <body class="d-flex flex-column min-vh-100">
     <div class="container">
 
-    <?php include_once('header.php'); ?>
-        <h1>Site de recettes</h1>
-
-        <!-- inclusion des variables et fonctions -->
-        <?php
-            include_once('variables.php');
-            include_once('functions.php');
-        ?>
-
-        <!-- inclusion de l'entête du site -->
         <?php include_once('header.php'); ?>
-        
+
+        <?php if ($isConnected == true) : ?>
+
+        <h1> Site de recettes</h1>
+
+        <p>Bienvenue <?php echo $loggedUser['full_name'] ?> !</p>
+
         <?php foreach(getRecipes($recipes) as $recipe) : ?>
             <article>
                 <h3><?php echo $recipe['title']; ?></h3>
@@ -33,6 +93,16 @@
                 <i><?php echo displayAuthor($recipe['author'], $users); ?></i>
             </article>
         <?php endforeach ?>
+        
+        <?php endif ?>
+
+        <!--Connection form-->
+        <?php 
+            if ($isConnected == false) {
+                include_once('login.php');
+            }
+        ?>
+
     </div>
 
     <!-- inclusion du bas de page du site -->
