@@ -1,12 +1,12 @@
 <!-- index.php -->
 
 <?php
+    //start a session
+    session_start();
+
     //include some variables and functions
     include_once('variables.php');
     include_once('functions.php');
-
-    // Is connected ?
-    $isConnected = false;
     
     //Is the user coming from the connection form
     if (isset($_POST['connection'])) {
@@ -15,7 +15,6 @@
         if (!isset($_POST['email']) || !isset($_POST['password'])) {
 
             echo 'Une des informations du formulaire de connexion est manquante.';
-            $isConnected = false;
 
         } else {
 
@@ -41,8 +40,8 @@
                         //test password
                         if ($password == $user['password']) {
 
-                            $isConnected = true;
-                            $loggedUser = $user;
+                            $_SESSION['loggedUser'] = $user;
+                            setcookie('loggedUser', $user['age'], ['expires' => time() + 3600, 'secure' => true, 'httponly' => true]);
 
                         } else {
 
@@ -80,11 +79,12 @@
 
         <?php include_once('header.php'); ?>
 
-        <?php if ($isConnected == true) : ?>
+        <?php if (isset($_SESSION['loggedUser'])) : ?>
 
         <h1> Site de recettes</h1>
 
-        <p>Bienvenue <?php echo $loggedUser['full_name'] ?> !</p>
+        <p>Bienvenue <?php echo htmlspecialchars($_SESSION['loggedUser']['full_name']) ?> !</p>
+        <p>Vous avez <?php echo htmlspecialchars($_COOKIE['loggedUser']) ?> .</p>
 
         <?php foreach(getRecipes($recipes) as $recipe) : ?>
             <article>
@@ -93,12 +93,14 @@
                 <i><?php echo displayAuthor($recipe['author'], $users); ?></i>
             </article>
         <?php endforeach ?>
+
+        <a href='seDeconnecter.php'>Se deconnecter</a>
         
         <?php endif ?>
 
         <!--Connection form-->
         <?php 
-            if ($isConnected == false) {
+            if (!isset($_SESSION['loggedUser'])) {
                 include_once('login.php');
             }
         ?>
