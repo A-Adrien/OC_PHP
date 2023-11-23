@@ -4,8 +4,28 @@
     //start a session
     session_start();
 
+    try
+    {
+	    $db = new PDO('mysql:host=localhost;dbname=my_recipes;charset=utf8', 'root', '');
+    }
+    catch (Exception $e)
+    {
+        die('Erreur : ' . $e->getMessage());
+    }
+
+    //recuperer les recettes valides
+    $sqlQuery = 'SELECT * FROM recipes WHERE is_enabled = 1';
+    $recipesStatement = $db->prepare($sqlQuery);
+    $recipesStatement->execute();
+    $recipes = $recipesStatement->fetchAll();
+
+    //recuperer les utilisateurs
+    $sqlQuery = 'SELECT * FROM users';
+    $usersStatement = $db->prepare($sqlQuery);
+    $usersStatement->execute();
+    $users = $usersStatement->fetchAll();
+
     //include some variables and functions
-    include_once('variables.php');
     include_once('functions.php');
     
     //Is the user coming from the connection form
@@ -41,7 +61,6 @@
                         if ($password == $user['password']) {
 
                             $_SESSION['loggedUser'] = $user;
-                            setcookie('loggedUser', $user['age'], ['expires' => time() + 3600, 'secure' => true, 'httponly' => true]);
 
                         } else {
 
@@ -84,17 +103,26 @@
         <h1> Site de recettes</h1>
 
         <p>Bienvenue <?php echo htmlspecialchars($_SESSION['loggedUser']['full_name']) ?> !</p>
-        <p>Vous avez <?php echo htmlspecialchars($_COOKIE['loggedUser']) ?> .</p>
 
-        <?php foreach(getRecipes($recipes) as $recipe) : ?>
+        <?php foreach($recipes as $recipe) : ?>
             <article>
                 <h3><?php echo $recipe['title']; ?></h3>
                 <div><?php echo $recipe['recipe']; ?></div>
                 <i><?php echo displayAuthor($recipe['author'], $users); ?></i>
+                <div style="display: flex; width: 230px; justify-content: space-between;">
+                    <div style="border: 1px solid orange; text-align: center; width: 100px;">
+                        <a href="edit_recipe.php/?id=<?php echo $recipe['recipe_id']; ?>" style="color: orange; text-decoration: none;">Editer</a>
+                    </div>
+                    <div style="border: 1px solid red; text-align: center; width: 100px;">                                      
+                        <a href="delete_recipe.php/?id=<?php echo $recipe['recipe_id']; ?>" style="color: red; text-decoration: none;">Supprimer</a>
+                    </div>
+                </div>
             </article>
         <?php endforeach ?>
 
-        <a href='seDeconnecter.php'>Se deconnecter</a>
+        <p><a href="submit_recipe.php">Soumettre une recette !</a></p>
+
+        <p><a href='seDeconnecter.php'>Se deconnecter</a></p>
         
         <?php endif ?>
 
